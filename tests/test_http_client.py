@@ -15,10 +15,10 @@ class StripeClientTestCase(object):
 
     @pytest.fixture
     def request_mocks(self, mocker):
-        request_mocks = {}
-        for lib in self.REQUEST_LIBRARIES:
-            request_mocks[lib] = mocker.patch("stripe.http_client.%s" % (lib,))
-        return request_mocks
+        return {
+            lib: mocker.patch("stripe.http_client.%s" % (lib,))
+            for lib in self.REQUEST_LIBRARIES
+        }
 
 
 class TestNewDefaultHttpClient(StripeClientTestCase):
@@ -972,7 +972,7 @@ class TestAPIEncode(StripeClientTestCase):
     def test_encode_dict(self):
         body = {"foo": {"dob": {"month": 1}, "name": "bat"}}
 
-        values = [t for t in stripe.api_requestor._api_encode(body)]
+        values = list(stripe.api_requestor._api_encode(body))
 
         assert ("foo[dob][month]", 1) in values
         assert ("foo[name]", "bat") in values
@@ -980,7 +980,7 @@ class TestAPIEncode(StripeClientTestCase):
     def test_encode_array(self):
         body = {"foo": [{"dob": {"month": 1}, "name": "bat"}]}
 
-        values = [t for t in stripe.api_requestor._api_encode(body)]
+        values = list(stripe.api_requestor._api_encode(body))
 
         assert ("foo[0][dob][month]", 1) in values
         assert ("foo[0][name]", "bat") in values

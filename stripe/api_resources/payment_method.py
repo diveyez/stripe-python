@@ -18,13 +18,13 @@ class PaymentMethod(
     OBJECT_NAME = "payment_method"
 
     def attach(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/attach"
+        url = f'{self.instance_url()}/attach'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def detach(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/detach"
+        url = f'{self.instance_url()}/detach'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self

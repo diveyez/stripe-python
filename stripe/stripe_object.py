@@ -148,17 +148,12 @@ class StripeObject(dict):
     # class and not as a dict, otherwise __setstate__ would not be called when
     # unpickling.
     def __reduce__(self):
-        reduce_value = (
-            type(self),  # callable
-            (  # args
+        return type(self), (  # args
                 self.get("id", None),
                 self.api_key,
                 self.stripe_version,
                 self.stripe_account,
-            ),
-            dict(self),  # state
-        )
-        return reduce_value
+            ), dict(self)
 
     @classmethod
     def construct_from(
@@ -275,10 +270,7 @@ class StripeObject(dict):
             str(self),
         )
 
-        if six.PY2:
-            return unicode_repr.encode("utf-8")
-        else:
-            return unicode_repr
+        return unicode_repr.encode("utf-8") if six.PY2 else unicode_repr
 
     def __str__(self):
         return json.dumps(

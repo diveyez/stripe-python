@@ -162,12 +162,11 @@ class HTTPClient(object):
                 )
                 time.sleep(sleep_time)
             else:
-                if response is not None:
-                    self._record_request_metrics(response, request_start)
-
-                    return response
-                else:
+                if response is None:
                     raise connection_error
+                self._record_request_metrics(response, request_start)
+
+                return response
 
     def request(self, method, url, headers, post_data=None):
         raise NotImplementedError(
@@ -303,12 +302,7 @@ class RequestsClient(HTTPClient):
         )
 
     def _request_internal(self, method, url, headers, post_data, is_streaming):
-        kwargs = {}
-        if self._verify_ssl_certs:
-            kwargs["verify"] = stripe.ca_bundle_path
-        else:
-            kwargs["verify"] = False
-
+        kwargs = {"verify": stripe.ca_bundle_path if self._verify_ssl_certs else False}
         if self._proxy:
             kwargs["proxies"] = self._proxy
 
@@ -338,14 +332,7 @@ class RequestsClient(HTTPClient):
                     "underlying error was: %s" % (e,)
                 )
 
-            if is_streaming:
-                content = result.raw
-            else:
-                # This causes the content to actually be read, which could cause
-                # e.g. a socket timeout. TODO: The other fetch methods probably
-                # are susceptible to the same and should be updated.
-                content = result.content
-
+            content = result.raw if is_streaming else result.content
             status_code = result.status_code
         except Exception as e:
             # Would catch just requests.exceptions.RequestException, but can
@@ -517,7 +504,7 @@ class PycurlClient(HTTPClient):
             return {}
         raw_headers = data.split("\r\n", 1)[1]
         headers = email.message_from_string(raw_headers)
-        return dict((k.lower(), v) for k, v in six.iteritems(dict(headers)))
+        return {k.lower(): v for k, v in six.iteritems(dict(headers))}
 
     def request(self, method, url, headers, post_data=None):
         return self._request_internal(
@@ -541,8 +528,7 @@ class PycurlClient(HTTPClient):
         # object.
         self._curl.reset()
 
-        proxy = self._get_proxy(url)
-        if proxy:
+        if proxy := self._get_proxy(url):
             if proxy.hostname:
                 self._curl.setopt(pycurl.PROXY, proxy.hostname)
             if proxy.port:
@@ -631,7 +617,7 @@ class PycurlClient(HTTPClient):
             proxy = self._proxy
             scheme = url.split(":")[0] if url else None
             if scheme:
-                return proxy.get(scheme, proxy.get(scheme[0:-1]))
+                return proxy.get(scheme, proxy.get(scheme[:-1]))
         return None
 
     def close(self):
@@ -679,11 +665,7 @@ class Urllib2Client(HTTPClient):
                 else urllib.request.urlopen(req)
             )
 
-            if is_streaming:
-                rcontent = response
-            else:
-                rcontent = response.read()
-
+            rcontent = response if is_streaming else response.read()
             rcode = response.code
             headers = dict(response.info())
         except urllib.error.HTTPError as e:
@@ -692,7 +674,7 @@ class Urllib2Client(HTTPClient):
             headers = dict(e.info())
         except (urllib.error.URLError, ValueError) as e:
             self._handle_request_error(e)
-        lh = dict((k.lower(), v) for k, v in six.iteritems(dict(headers)))
+        lh = {k.lower(): v for k, v in six.iteritems(dict(headers))}
         return rcontent, rcode, lh
 
     def _handle_request_error(self, e):

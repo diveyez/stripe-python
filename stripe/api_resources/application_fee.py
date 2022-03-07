@@ -15,6 +15,6 @@ class ApplicationFee(ListableAPIResource):
 
     def refund(self, idempotency_key=None, **params):
         headers = util.populate_headers(idempotency_key)
-        url = self.instance_url() + "/refund"
+        url = f'{self.instance_url()}/refund'
         self.refresh_from(self.request("post", url, params, headers))
         return self

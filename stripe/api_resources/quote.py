@@ -24,25 +24,25 @@ class Quote(CreateableAPIResource, ListableAPIResource, UpdateableAPIResource):
     OBJECT_NAME = "quote"
 
     def accept(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/accept"
+        url = f'{self.instance_url()}/accept'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def cancel(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/cancel"
+        url = f'{self.instance_url()}/cancel'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def finalize_quote(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/finalize"
+        url = f'{self.instance_url()}/finalize'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def list_computed_upfront_line_items(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/computed_upfront_line_items"
+        url = f'{self.instance_url()}/computed_upfront_line_items'
         headers = util.populate_headers(idempotency_key)
         resp = self.request("get", url, params, headers)
         stripe_object = util.convert_to_stripe_object(resp)
@@ -50,7 +50,7 @@ class Quote(CreateableAPIResource, ListableAPIResource, UpdateableAPIResource):
         return stripe_object
 
     def list_line_items(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/line_items"
+        url = f'{self.instance_url()}/line_items'
         headers = util.populate_headers(idempotency_key)
         resp = self.request("get", url, params, headers)
         stripe_object = util.convert_to_stripe_object(resp)
@@ -98,5 +98,5 @@ class Quote(CreateableAPIResource, ListableAPIResource, UpdateableAPIResource):
             api_version=version,
             account=stripe_account,
         )
-        url = self.instance_url() + "/pdf"
+        url = f'{self.instance_url()}/pdf'
         return requestor.request_stream("get", url, params=params)

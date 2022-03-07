@@ -12,4 +12,4 @@ class Card(CreateableAPIResource, ListableAPIResource, UpdateableAPIResource):
     OBJECT_NAME = "issuing.card"
 
     def details(self, idempotency_key=None, **params):
-        return self.request("get", self.instance_url() + "/details", params)
+        return self.request("get", f'{self.instance_url()}/details', params)

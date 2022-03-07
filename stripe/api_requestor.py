@@ -39,18 +39,16 @@ def _api_encode(data):
             continue
         elif hasattr(value, "stripe_id"):
             yield (key, value.stripe_id)
-        elif isinstance(value, list) or isinstance(value, tuple):
+        elif isinstance(value, (list, tuple)):
             for i, sv in enumerate(value):
                 if isinstance(sv, dict):
                     subdict = _encode_nested_dict("%s[%d]" % (key, i), sv)
-                    for k, v in _api_encode(subdict):
-                        yield (k, v)
+                    yield from _api_encode(subdict)
                 else:
                     yield ("%s[%d]" % (key, i), util.utf8(sv))
         elif isinstance(value, dict):
             subdict = _encode_nested_dict(key, value)
-            for subkey, subvalue in _api_encode(subdict):
-                yield (subkey, subvalue)
+            yield from _api_encode(subdict)
         elif isinstance(value, datetime.datetime):
             yield (key, _encode_datetime(value))
         else:
@@ -241,7 +239,7 @@ class APIRequestor(object):
     def request_headers(self, api_key, method):
         user_agent = "Stripe/v1 PythonBindings/%s" % (version.VERSION,)
         if stripe.app_info:
-            user_agent += " " + self.format_app_info(stripe.app_info)
+            user_agent += f" {self.format_app_info(stripe.app_info)}"
 
         ua = {
             "bindings_version": version.VERSION,
@@ -317,7 +315,7 @@ class APIRequestor(object):
         # makes these parameter strings easier to read.
         encoded_params = encoded_params.replace("%5B", "[").replace("%5D", "]")
 
-        if method == "get" or method == "delete":
+        if method in ["get", "delete"]:
             if params:
                 abs_url = _build_api_url(abs_url, encoded_params)
             post_data = None
@@ -400,21 +398,16 @@ class APIRequestor(object):
         return resp
 
     def interpret_streaming_response(self, stream, rcode, rheaders):
-        # Streaming response are handled with minimal processing for the success
-        # case (ie. we don't want to read the content). When an error is
-        # received, we need to read from the stream and parse the received JSON,
-        # treating it like a standard JSON response.
-        if self._should_handle_code_as_error(rcode):
-            if hasattr(stream, "getvalue"):
-                json_content = stream.getvalue()
-            elif hasattr(stream, "read"):
-                json_content = stream.read()
-            else:
-                raise NotImplementedError(
-                    "HTTP client %s does not return an IOBase object which "
-                    "can be consumed when streaming a response."
-                )
-
-            return self.interpret_response(json_content, rcode, rheaders)
-        else:
+        if not self._should_handle_code_as_error(rcode):
             return StripeStreamResponse(stream, rcode, rheaders)
+        if hasattr(stream, "getvalue"):
+            json_content = stream.getvalue()
+        elif hasattr(stream, "read"):
+            json_content = stream.read()
+        else:
+            raise NotImplementedError(
+                "HTTP client %s does not return an IOBase object which "
+                "can be consumed when streaming a response."
+            )
+
+        return self.interpret_response(json_content, rcode, rheaders)

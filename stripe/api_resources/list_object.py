@@ -78,10 +78,9 @@ class ListObject(StripeObject):
         )
         headers = util.populate_headers(idempotency_key)
         response, api_key = requestor.request(method_, url_, params, headers)
-        stripe_object = util.convert_to_stripe_object(
+        return util.convert_to_stripe_object(
             response, api_key, stripe_version, stripe_account
         )
-        return stripe_object
 
     def __getitem__(self, k):
         if isinstance(k, six.string_types):
@@ -108,15 +107,13 @@ class ListObject(StripeObject):
 
         while True:
             if (
-                "ending_before" in self._retrieve_params
-                and "starting_after" not in self._retrieve_params
+                "ending_before" in page._retrieve_params
+                and "starting_after" not in page._retrieve_params
             ):
-                for item in reversed(page):
-                    yield item
+                yield from reversed(page)
                 page = page.previous_page()
             else:
-                for item in page:
-                    yield item
+                yield from page
                 page = page.next_page()
 
             if page.is_empty:

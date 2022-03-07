@@ -14,7 +14,7 @@ class Session(CreateableAPIResource, ListableAPIResource):
     OBJECT_NAME = "checkout.session"
 
     def expire(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/expire"
+        url = f'{self.instance_url()}/expire'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self

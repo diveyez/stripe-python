@@ -24,6 +24,6 @@ class Subscription(
             api_version=self.stripe_version,
             account=self.stripe_account,
         )
-        url = self.instance_url() + "/discount"
+        url = f'{self.instance_url()}/discount'
         _, api_key = requestor.request("delete", url, params)
         self.refresh_from({"discount": None}, api_key, True)

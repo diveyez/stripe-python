@@ -22,7 +22,7 @@ class Transfer(
     OBJECT_NAME = "transfer"
 
     def cancel(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/cancel"
+        url = f'{self.instance_url()}/cancel'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
