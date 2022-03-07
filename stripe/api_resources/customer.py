@@ -38,7 +38,7 @@ class Customer(
     OBJECT_NAME = "customer"
 
     def list_payment_methods(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/payment_methods"
+        url = f'{self.instance_url()}/payment_methods'
         headers = util.populate_headers(idempotency_key)
         resp = self.request("get", url, params, headers)
         stripe_object = util.convert_to_stripe_object(resp)
@@ -51,6 +51,6 @@ class Customer(
             api_version=self.stripe_version,
             account=self.stripe_account,
         )
-        url = self.instance_url() + "/discount"
+        url = f'{self.instance_url()}/discount'
         _, api_key = requestor.request("delete", url, params)
         self.refresh_from({"discount": None}, api_key, True)

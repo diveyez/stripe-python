@@ -118,11 +118,7 @@ class APIHeaderMatcher(object):
         return True
 
     def _extra_match(self, other):
-        for k, v in six.iteritems(self.extra):
-            if other[k] != v:
-                return False
-
-        return True
+        return all(other[k] == v for k, v in six.iteritems(self.extra))
 
 
 class QueryMatcher(object):
@@ -238,8 +234,7 @@ class TestAPIRequestor(object):
 
     @pytest.fixture
     def requestor(self, http_client):
-        requestor = stripe.api_requestor.APIRequestor(client=http_client)
-        return requestor
+        return stripe.api_requestor.APIRequestor(client=http_client)
 
     @pytest.fixture
     def mock_response(self, mocker, http_client):
@@ -386,11 +381,7 @@ class TestAPIRequestor(object):
 
             resp, key = requestor.request(meth, self.valid_path, {})
 
-            if meth == "post":
-                post_data = ""
-            else:
-                post_data = None
-
+            post_data = "" if meth == "post" else None
             check_call(meth, post_data=post_data)
             assert isinstance(resp, StripeResponse)
 
@@ -409,11 +400,7 @@ class TestAPIRequestor(object):
                 {},
             )
 
-            if meth == "post":
-                post_data = ""
-            else:
-                post_data = None
-
+            post_data = "" if meth == "post" else None
             check_call(meth, post_data=post_data, is_streaming=True)
             assert isinstance(resp, StripeStreamResponse)
 

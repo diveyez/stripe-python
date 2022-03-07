@@ -16,13 +16,13 @@ class Charge(
     OBJECT_NAME = "charge"
 
     def capture(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/capture"
+        url = f'{self.instance_url()}/capture'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def refund(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/refund"
+        url = f'{self.instance_url()}/refund'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
@@ -33,7 +33,7 @@ class Charge(
             api_version=self.stripe_version,
             account=self.stripe_account,
         )
-        url = self.instance_url() + "/dispute"
+        url = f'{self.instance_url()}/dispute'
         headers = util.populate_headers(idempotency_key)
         response, api_key = requestor.request("post", url, params, headers)
         self.refresh_from({"dispute": response}, api_key, True)
@@ -45,7 +45,7 @@ class Charge(
             api_version=self.stripe_version,
             account=self.stripe_account,
         )
-        url = self.instance_url() + "/dispute/close"
+        url = f'{self.instance_url()}/dispute/close'
         headers = util.populate_headers(idempotency_key)
         response, api_key = requestor.request("post", url, params, headers)
         self.refresh_from({"dispute": response}, api_key, True)

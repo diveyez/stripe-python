@@ -24,31 +24,31 @@ class Invoice(
     OBJECT_NAME = "invoice"
 
     def finalize_invoice(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/finalize"
+        url = f'{self.instance_url()}/finalize'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def mark_uncollectible(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/mark_uncollectible"
+        url = f'{self.instance_url()}/mark_uncollectible'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def pay(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/pay"
+        url = f'{self.instance_url()}/pay'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def send_invoice(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/send"
+        url = f'{self.instance_url()}/send'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def void_invoice(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/void"
+        url = f'{self.instance_url()}/void'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
@@ -60,7 +60,7 @@ class Invoice(
         requestor = api_requestor.APIRequestor(
             api_key, api_version=stripe_version, account=stripe_account
         )
-        url = cls.class_url() + "/upcoming"
+        url = f'{cls.class_url()}/upcoming'
         response, api_key = requestor.request("get", url, params)
         return util.convert_to_stripe_object(
             response, api_key, stripe_version, stripe_account

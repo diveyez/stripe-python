@@ -14,13 +14,11 @@ class Order(CreateableAPIResource, ListableAPIResource, UpdateableAPIResource):
     OBJECT_NAME = "order"
 
     def pay(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/pay"
+        url = f'{self.instance_url()}/pay'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
 
     def return_order(self, idempotency_key=None, **params):
         headers = util.populate_headers(idempotency_key)
-        return self.request(
-            "post", self.instance_url() + "/returns", params, headers
-        )
+        return self.request("post", f'{self.instance_url()}/returns', params, headers)

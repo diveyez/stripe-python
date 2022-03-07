@@ -17,7 +17,7 @@ class PaymentLink(
     OBJECT_NAME = "payment_link"
 
     def list_line_items(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/line_items"
+        url = f'{self.instance_url()}/line_items'
         headers = util.populate_headers(idempotency_key)
         resp = self.request("get", url, params, headers)
         stripe_object = util.convert_to_stripe_object(resp)

@@ -37,7 +37,7 @@ class Account(
     OBJECT_NAME = "account"
 
     def reject(self, idempotency_key=None, **params):
-        url = self.instance_url() + "/reject"
+        url = f'{self.instance_url()}/reject'
         headers = util.populate_headers(idempotency_key)
         self.refresh_from(self.request("post", url, params, headers))
         return self
@@ -69,7 +69,7 @@ class Account(
         return self._build_instance_url(self.get("id"))
 
     def persons(self, **params):
-        return self.request("get", self.instance_url() + "/persons", params)
+        return self.request("get", f'{self.instance_url()}/persons', params)
 
     def deauthorize(self, **params):
         params["stripe_user_id"] = self.id
